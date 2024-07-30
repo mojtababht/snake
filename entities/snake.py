@@ -5,7 +5,7 @@ class Snake:
         self.points = [(0, 0), (1, 0)]
         self.dir = 'r'
 
-    def move(self, ate=False):
+    def move(self, food_pos):
         x, y = self.points[-1]
         match self.dir:
             case 'r':
@@ -29,8 +29,10 @@ class Snake:
                 else:
                     y += 1
         self.points.append((x, y))
-        if not ate:
+        if not food_pos == (x, y):
             self.points.pop(0)
+        return x, y
+
 
     def change_dir(self, dir):
         if {self.dir, dir} == {'l', 'r'} or {self.dir, dir} == {'u', 'd'}:

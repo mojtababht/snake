@@ -1,18 +1,20 @@
 import pygame
 
 from entities.snake import Snake
+from entities.foods import Apple
 
 
 class Game:
     bg_color = (162, 209, 73)
 
-    def __init__(self, unit, snake: Snake):
+    def __init__(self, unit):
         pygame.init()
         self.unit = unit
         screen_size = unit * 15
         self.screen = pygame.display.set_mode((screen_size, screen_size))
         self.clock = pygame.time.Clock()
-        self.snake = snake
+        self.snake = Snake()
+        self.food = self.get_food()
         self.update()
         self.clock.tick(5)
 
@@ -22,7 +24,7 @@ class Game:
             for event in pygame.event.get():
                 running = self.handel_event(event)
             pygame.display.flip()
-            self.snake.move()
+            self.move()
             self.update()
             self.clock.tick(5)
         pygame.quit()
@@ -43,10 +45,11 @@ class Game:
     def update(self):
         self.screen.fill(self.bg_color)
         self.draw_snake()
+        self.draw_apple()
         pygame.display.update()
 
     def draw_snake(self):
-        points = snake.points
+        points = self.snake.points
         for point in points:
             rect = pygame.Rect(0, 0, self.unit, self.unit)
             rect.center = self.get_point_cord(point)
@@ -60,6 +63,11 @@ class Game:
         # mid_rect.center = (b_head_x + head_x) / 2, (b_head_y + head_y) / 2
         # pygame.draw.rect(self.screen, self.snake.color, mid_rect)
 
+    def draw_apple(self):
+        rect = pygame.Rect(0, 0, self.unit, self.unit)
+        rect.center = self.get_point_cord(self.food.point)
+        pygame.draw.rect(self.screen, self.food.color, rect)
+        pygame.display.update()
 
     def get_point_cord(self, point):
         x, y = point
@@ -67,9 +75,18 @@ class Game:
         y = (self.unit / 2) + (y * self.unit)
         return x, y
 
+    def move(self):
+        if self.snake.move(self.food.point) == self.food.point:
+            self.food = self.get_food()
+
+    def get_food(self):
+        food = Apple()
+        while food.point in self.snake.points:
+            food = Apple()
+        return food
+
 
 if __name__ == '__main__':
     UNIT = 40
-    snake = Snake()
-    game = Game(UNIT, snake)
+    game = Game(UNIT)
     game.main_loop()
