@@ -1,7 +1,7 @@
 import pygame
 
 from entities.snake import Snake
-from entities.foods import Apple
+from entities.foods import Apple, Pineapple
 
 
 class Game:
@@ -24,8 +24,9 @@ class Game:
             for event in pygame.event.get():
                 running = self.handel_event(event)
             pygame.display.flip()
-            self.move()
-            self.update()
+            if not self.move():
+                print('game over')
+                running = False
             self.clock.tick(5)
         pygame.quit()
 
@@ -45,7 +46,7 @@ class Game:
     def update(self):
         self.screen.fill(self.bg_color)
         self.draw_snake()
-        self.draw_apple()
+        self.draw_food()
         pygame.display.update()
 
     def draw_snake(self):
@@ -69,6 +70,9 @@ class Game:
         pygame.draw.rect(self.screen, self.food.color, rect)
         pygame.display.update()
 
+    def draw_pineapple(self):
+        ...
+
     def get_point_cord(self, point):
         x, y = point
         x = (self.unit / 2) + (x * self.unit)
@@ -76,14 +80,25 @@ class Game:
         return x, y
 
     def move(self):
-        if self.snake.move(self.food.point) == self.food.point:
+        new_point = self.snake.move(self.food.point)
+        if self.snake.points.count(new_point) >= 2:
+            return False
+        if new_point == self.food.point:
             self.food = self.get_food()
+        self.update()
+        return True
 
     def get_food(self):
         food = Apple()
         while food.point in self.snake.points:
             food = Apple()
         return food
+
+    def draw_food(self):
+        if type(self.food) == Apple:
+            self.draw_apple()
+        else:
+            self.draw_pineapple()
 
 
 if __name__ == '__main__':
