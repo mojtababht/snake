@@ -8,6 +8,9 @@ class Game:
     bg_color = (162, 209, 73)
 
     def __init__(self, unit):
+        self.tick = 0
+        self.score = 0
+        self.eaten_apple = 0
         pygame.init()
         self.unit = unit
         screen_size = unit * 15
@@ -25,9 +28,15 @@ class Game:
                 running = self.handel_event(event)
             pygame.display.flip()
             if not self.move():
-                print('game over')
+                print(f'game over! your score is: {self.score}')
                 running = False
             self.clock.tick(5)
+            if type(self.food) == Pineapple:
+                if self.tick == 30:
+                    self.food = self.get_food(True)
+                    self.tick = 0
+                else:
+                    self.tick += 1
         pygame.quit()
 
     def handel_event(self, event):
@@ -71,7 +80,10 @@ class Game:
         pygame.display.update()
 
     def draw_pineapple(self):
-        ...
+        rect = pygame.Rect(0, 0, self.unit, self.unit)
+        rect.center = self.get_point_cord(self.food.point)
+        pygame.draw.rect(self.screen, self.food.color, rect)
+        pygame.display.update()
 
     def get_point_cord(self, point):
         x, y = point
@@ -84,14 +96,24 @@ class Game:
         if self.snake.points.count(new_point) >= 2:
             return False
         if new_point == self.food.point:
-            self.food = self.get_food()
+            if type(self.food) == Apple:
+                self.score += 1
+                self.eaten_apple += 1
+            elif type(self.food) == Pineapple:
+                self.score += 5
+            self.food = self.get_food(type(self.food) == Pineapple)
         self.update()
         return True
 
-    def get_food(self):
-        food = Apple()
+    def get_food(self, reset=False):
+        if not reset and self.eaten_apple != 0 and self.eaten_apple % 5 == 0:
+            food_class = Pineapple
+            self.tick = 0
+        else:
+            food_class = Apple
+        food = food_class()
         while food.point in self.snake.points:
-            food = Apple()
+            food = food_class()
         return food
 
     def draw_food(self):
