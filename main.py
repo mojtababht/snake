@@ -1,3 +1,4 @@
+import time
 import pygame
 
 from entities.snake import Snake
@@ -28,7 +29,7 @@ class Game:
                 running = self.handel_event(event)
             pygame.display.flip()
             if not self.move():
-                print(f'game over! your score is: {self.score}')
+                self.game_over()
                 running = False
             self.clock.tick(5)
             if type(self.food) == Pineapple:
@@ -55,23 +56,84 @@ class Game:
     def update(self):
         self.screen.fill(self.bg_color)
         self.draw_snake()
+        self.show_score()
         self.draw_food()
         pygame.display.update()
 
+    def draw_tongue(self, head_rect):
+        match self.snake.dir:
+            case 'r':
+                x = head_rect.right
+                y = head_rect.center[1]
+                points = (
+                    (x, y + .07 * self.unit),
+                    (x + .3 * self.unit, y + .07 * self.unit),
+                    (x + .2 * self.unit, y),
+                    (x + .3 * self.unit, y - .07 * self.unit),
+                    (x, y - .07 * self.unit),
+                )
+            case 'l':
+                x = head_rect.left
+                y = head_rect.center[1]
+                points = (
+                    (x, y + .07 * self.unit),
+                    (x - .3 * self.unit, y + .07 * self.unit),
+                    (x - .2 * self.unit, y),
+                    (x - .3 * self.unit, y - .07 * self.unit),
+                    (x, y - .07 * self.unit),
+                )
+            case 'u':
+                x = head_rect.center[0]
+                y = head_rect.top
+                points = (
+                    (x + .07 * self.unit, y),
+                    (x + .07 * self.unit, y - .3 * self.unit),
+                    (x, y - .2 * self.unit),
+                    (x - .07 * self.unit, y - .3 * self.unit),
+                    (x - .07 * self.unit, y),
+                )
+            case 'd':
+                x = head_rect.center[0]
+                y = head_rect.bottom
+                points = (
+                    (x + .07 * self.unit, y),
+                    (x + .07 * self.unit, y + .3 * self.unit),
+                    (x, y + .2 * self.unit),
+                    (x - .07 * self.unit, y + .3 * self.unit),
+                    (x - .07 * self.unit, y),
+                )
+            case _:
+                raise ValueError('snake.dir most be in ("r", "l", "u", "d")')
+
+        pygame.draw.polygon(self.screen, 'red', points)
+
+    def draw_head(self):
+        head_rect = pygame.Rect(0, 0, .9 * self.unit, .9 * self.unit)
+        head_rect.center = self.get_point_cord(self.snake.points[-1])
+        pygame.draw.rect(self.screen, self.snake.color, head_rect)
+        self.draw_tongue(head_rect)
+
+    def draw_tail(self):
+        tail_rect = pygame.Rect(0, 0, .9 * self.unit, .9 * self.unit)
+        tail_rect.center = self.get_point_cord(self.snake.points[0])
+        pygame.draw.rect(self.screen, self.snake.color, tail_rect)
+
     def draw_snake(self):
         points = self.snake.points
-        for point in points:
-            rect = pygame.Rect(0, 0, self.unit, self.unit)
+        self.draw_head()
+        self.draw_tail()
+        for point in points[1:-1]:
+            rect = pygame.Rect(0, 0, .9 * self.unit, .9 * self.unit)
             rect.center = self.get_point_cord(point)
             pygame.draw.rect(self.screen, self.snake.color, rect)
-        # head_rect = pygame.Rect(0, 0, self.unit, self.unit)
-        # head_x, head_y = self.get_point_cord(points[-1])
-        # head_rect.center = head_x, head_y
-        # pygame.draw.ellipse(self.screen, snake.color, head_rect)
-        # b_head_x, b_head_y = self.get_point_cord(points[-2])
-        # mid_rect = pygame.Rect(0, 0, self.unit, self.unit)
-        # mid_rect.center = (b_head_x + head_x) / 2, (b_head_y + head_y) / 2
-        # pygame.draw.rect(self.screen, self.snake.color, mid_rect)
+            # filling among 2 rects
+            x, y = point
+            x_2, y_2 = points[points.index(point) - 1]
+            if abs(x - x_2) <= 1 and abs(y - y_2) <= 1:
+                rect_2 = pygame.Rect(0, 0, .9 * self.unit, .9 * self.unit)
+                among_point = ((x + x_2) / 2, (y + y_2) / 2)
+                rect_2.center = self.get_point_cord(among_point)
+                pygame.draw.rect(self.screen, self.snake.color, rect_2)
 
     def draw_apple(self):
         rect = pygame.Rect(0, 0, self.unit, self.unit)
@@ -121,6 +183,23 @@ class Game:
             self.draw_apple()
         else:
             self.draw_pineapple()
+
+    def show_score(self, color='black', font='times new roman', size=20):
+        score_font = pygame.font.SysFont(font, size)
+        score_surface = score_font.render('Score : ' + str(self.score), True, color)
+        score_rect = score_surface.get_rect()
+        self.screen.blit(score_surface, score_rect)
+
+    def game_over(self):
+        my_font = pygame.font.SysFont('times new roman', 50)
+        game_over_surface = my_font.render('Your Score is : ' + str(self.score), True, 'red')
+        game_over_rect = game_over_surface.get_rect()
+        game_over_rect.midtop = (self.unit / 2, self.unit / 4)
+        self.screen.blit(game_over_surface, game_over_rect)
+        pygame.display.flip()
+        time.sleep(2)
+        pygame.quit()
+        quit()
 
 
 if __name__ == '__main__':
