@@ -1,4 +1,5 @@
 import time
+import json
 import pygame
 
 from entities.snake import Snake
@@ -7,6 +8,7 @@ from entities.foods import Apple, Pineapple
 
 class Game:
     bg_color = (162, 209, 73)
+    scores_file_name = 'scores.json'
 
     def __init__(self, unit):
         self.tick = 0
@@ -191,15 +193,48 @@ class Game:
         self.screen.blit(score_surface, score_rect)
 
     def game_over(self):
-        my_font = pygame.font.SysFont('times new roman', 50)
+        self.set_score()
+        my_font = pygame.font.SysFont('times new roman', 30)
         game_over_surface = my_font.render('Your Score is : ' + str(self.score), True, 'red')
         game_over_rect = game_over_surface.get_rect()
-        game_over_rect.midtop = (self.unit / 2, self.unit / 4)
+        game_over_rect.center = self.screen.get_rect().center
         self.screen.blit(game_over_surface, game_over_rect)
+        font = pygame.font.SysFont('times new roman', 30)
+        surface = font.render('top scores:', True, 'red')
+        rect = surface.get_rect()
+        x, y = self.screen.get_rect().center
+        rect.center = (x, y + self.unit * .7)
+        self.screen.blit(surface, rect)
+        for i, score in enumerate(self.get_scores()):
+            if i == 5:
+                break
+            font = pygame.font.SysFont('times new roman', 30)
+            surface = font.render(str(score), True, 'red')
+            rect = surface.get_rect()
+            x, y = self.screen.get_rect().center
+            rect.center = (x, y + (i + 2) * self.unit * .7)
+            self.screen.blit(surface, rect)
         pygame.display.flip()
         time.sleep(2)
-        pygame.quit()
-        quit()
+
+    def get_scores(self):
+        try:
+            with open(self.scores_file_name, 'r') as file:
+                scores = json.load(file)
+        except FileNotFoundError as e:
+            scores = []
+        except AttributeError as e:
+            raise AttributeError(f'scores_file_name must be set for {self.__class__.__name__}')
+        return scores
+
+    def set_score(self):
+        scores = self.get_scores()
+        if self.score in scores:
+            return
+        scores.append(self.score)
+        scores.sort(key=lambda x: x * -1)
+        with open(self.scores_file_name, 'w') as file:
+            json.dump(scores[:5], file)
 
 
 if __name__ == '__main__':
