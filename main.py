@@ -191,19 +191,60 @@ class Game:
         self.draw_eyes(head_rect)
 
     def draw_tail(self):
-        tail_rect = pygame.Rect(0, 0, .9 * self.unit, .9 * self.unit)
-        tail_rect.center = self.get_point_cord(self.snake.points[0])
-        pygame.draw.rect(self.screen, self.snake.color, tail_rect)
+        x_1, y_1 = self.get_point_cord(self.snake.points[0])
+        x_2, y_2 = self.get_point_cord(self.snake.points[1])
+        tail_points = []
+        if x_1 == x_2:
+            if y_1 - y_2 == self.unit:
+                tail_points.extend(
+                    (
+                        (x_1 - .45 * self.unit, y_1 - .55 * self.unit),
+                        (x_1 + .45 * self.unit, y_1 - .55 * self.unit),
+                        (x_1, y_1 + .5 * self.unit),
+                    )
+                )
+            elif y_2 - y_1 == self.unit:
+                tail_points.extend(
+                    (
+                        (x_1 - .45 * self.unit, y_1 + .55 * self.unit),
+                        (x_1 + .45 * self.unit, y_1 + .55 * self.unit),
+                        (x_1, y_1 - .5 * self.unit),
+                    )
+                )
+            else:
+                return
+        else:
+            if x_1 - x_2 == self.unit:
+                tail_points.extend(
+                    (
+                        (x_1 - .55 * self.unit, y_1 + .45 * self.unit),
+                        (x_1 - .55 * self.unit, y_1 - .45 * self.unit),
+                        (x_1 + .5 * self.unit, y_2),
+                    )
+                )
+            elif x_2 - x_1 == self.unit:
+                tail_points.extend(
+                    (
+                        (x_1 + .55 * self.unit, y_1 + .45 * self.unit),
+                        (x_1 + .55 * self.unit, y_1 - .45 * self.unit),
+                        (x_1 - .5 * self.unit, y_2),
+                    )
+                )
+            else:
+                return
+        pygame.draw.polygon(self.screen, self.snake.color, tail_points)
 
     def draw_snake(self):
         points = self.snake.points
         self.draw_head()
         self.draw_tail()
-        for point in points[1:-1]:
+        for i, point in enumerate(points[1:-1]):
             rect = pygame.Rect(0, 0, .9 * self.unit, .9 * self.unit)
             rect.center = self.get_point_cord(point)
             pygame.draw.rect(self.screen, self.snake.color, rect)
             # filling among 2 rects
+            if i == 0:
+                continue
             x, y = point
             x_2, y_2 = points[points.index(point) - 1]
             if abs(x - x_2) <= 1 and abs(y - y_2) <= 1:
