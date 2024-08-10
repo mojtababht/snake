@@ -109,11 +109,86 @@ class Game:
 
         pygame.draw.polygon(self.screen, 'red', points)
 
+    def draw_eyes(self, head_rect):
+        x, y = head_rect.center
+        match self.snake.dir:
+            case 'r':
+                x += .25 * self.unit
+                y_1 = y + .2 * self.unit
+                eye_1_outer_rect = pygame.Rect(0, 0, .2 * self.unit, .2 * self.unit)
+                eye_1_outer_rect.center = (x, y_1)
+                pygame.draw.rect(self.screen, 'white', eye_1_outer_rect)
+                eye_1_inner_rect = pygame.Rect(0, 0, .1 * self.unit, .15 * self.unit)
+                eye_1_inner_rect.center = eye_1_outer_rect.center
+                pygame.draw.rect(self.screen, 'black', eye_1_inner_rect)
+
+                y_2 = y - .2 * self.unit
+                eye_2_outer_rect = pygame.Rect(0, 0, .2 * self.unit, .2 * self.unit)
+                eye_2_outer_rect.center = (x, y_2)
+                pygame.draw.rect(self.screen, 'white', eye_2_outer_rect)
+                eye_2_inner_rect = pygame.Rect(0, 0, .1 * self.unit, .15 * self.unit)
+                eye_2_inner_rect.center = eye_2_outer_rect.center
+                pygame.draw.rect(self.screen, 'black', eye_2_inner_rect)
+            case 'l':
+                x -= .25 * self.unit
+                y_1 = y + .2 * self.unit
+                eye_1_outer_rect = pygame.Rect(0, 0, .2 * self.unit, .2 * self.unit)
+                eye_1_outer_rect.center = (x, y_1)
+                pygame.draw.rect(self.screen, 'white', eye_1_outer_rect)
+                eye_1_inner_rect = pygame.Rect(0, 0, .1 * self.unit, .15 * self.unit)
+                eye_1_inner_rect.center = eye_1_outer_rect.center
+                pygame.draw.rect(self.screen, 'black', eye_1_inner_rect)
+
+                y_2 = y - .2 * self.unit
+                eye_2_outer_rect = pygame.Rect(0, 0, .2 * self.unit, .2 * self.unit)
+                eye_2_outer_rect.center = (x, y_2)
+                pygame.draw.rect(self.screen, 'white', eye_2_outer_rect)
+                eye_2_inner_rect = pygame.Rect(0, 0, .1 * self.unit, .15 * self.unit)
+                eye_2_inner_rect.center = eye_2_outer_rect.center
+                pygame.draw.rect(self.screen, 'black', eye_2_inner_rect)
+            case 'u':
+                y -= .25 * self.unit
+                x_1 = x + .2 * self.unit
+                eye_1_outer_rect = pygame.Rect(0, 0, .2 * self.unit, .2 * self.unit)
+                eye_1_outer_rect.center = (x_1, y)
+                pygame.draw.rect(self.screen, 'white', eye_1_outer_rect)
+                eye_1_inner_rect = pygame.Rect(0, 0, .15 * self.unit, .1 * self.unit)
+                eye_1_inner_rect.center = eye_1_outer_rect.center
+                pygame.draw.rect(self.screen, 'black', eye_1_inner_rect)
+
+                x_2 = x - .2 * self.unit
+                eye_2_outer_rect = pygame.Rect(0, 0, .2 * self.unit, .2 * self.unit)
+                eye_2_outer_rect.center = (x_2, y)
+                pygame.draw.rect(self.screen, 'white', eye_2_outer_rect)
+                eye_2_inner_rect = pygame.Rect(0, 0, .15 * self.unit, .1 * self.unit)
+                eye_2_inner_rect.center = eye_2_outer_rect.center
+                pygame.draw.rect(self.screen, 'black', eye_2_inner_rect)
+            case 'd':
+                y += .25 * self.unit
+                x_1 = x + .2 * self.unit
+                eye_1_outer_rect = pygame.Rect(0, 0, .2 * self.unit, .2 * self.unit)
+                eye_1_outer_rect.center = (x_1, y)
+                pygame.draw.rect(self.screen, 'white', eye_1_outer_rect)
+                eye_1_inner_rect = pygame.Rect(0, 0, .15 * self.unit, .1 * self.unit)
+                eye_1_inner_rect.center = eye_1_outer_rect.center
+                pygame.draw.rect(self.screen, 'black', eye_1_inner_rect)
+
+                x_2 = x - .2 * self.unit
+                eye_2_outer_rect = pygame.Rect(0, 0, .2 * self.unit, .2 * self.unit)
+                eye_2_outer_rect.center = (x_2, y)
+                pygame.draw.rect(self.screen, 'white', eye_2_outer_rect)
+                eye_2_inner_rect = pygame.Rect(0, 0, .15 * self.unit, .1 * self.unit)
+                eye_2_inner_rect.center = eye_2_outer_rect.center
+                pygame.draw.rect(self.screen, 'black', eye_2_inner_rect)
+            case _:
+                raise ValueError('snake.dir most be in ("r", "l", "u", "d")')
+
     def draw_head(self):
         head_rect = pygame.Rect(0, 0, .9 * self.unit, .9 * self.unit)
         head_rect.center = self.get_point_cord(self.snake.points[-1])
         pygame.draw.rect(self.screen, self.snake.color, head_rect)
         self.draw_tongue(head_rect)
+        self.draw_eyes(head_rect)
 
     def draw_tail(self):
         tail_rect = pygame.Rect(0, 0, .9 * self.unit, .9 * self.unit)
